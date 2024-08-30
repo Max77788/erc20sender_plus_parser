@@ -193,7 +193,7 @@ async function fetchAndFilterTransactions(db) {
                         const sql = 'INSERT IGNORE INTO recipients (address) VALUES (?)';
                         db.query(sql, [recipient], (err, result) => {
                             if (err) throw err;
-                            // console.log(`Inserted address: ${recipient}`);
+                            console.log(`Inserted address: ${recipient}`);
                         });
                         // console.log(`Added ${recipient}`);
                     }

@@ -51,11 +51,12 @@ const sendBatch = async (_from, _batch_to, _tokenId, _count, _contract, provider
   const to_list      = _batch_to;
   const tokenId = _tokenId;
   const count   = _count;
-  try {
-      const _gasPrice = await provider.getGasPrice();
-      const gasPrice = Math.floor(_gasPrice * _gasgain);
 
       for (const to of to_list) {
+
+        try {
+          const _gasPrice = await provider.getGasPrice();
+          const gasPrice = Math.floor(_gasPrice * _gasgain);
         // Формируем объект для оценки gasLimit.
         const gasLimitEstimate = await _contract.estimateGas.sendTokens(
           count, to 
@@ -84,14 +85,38 @@ const sendBatch = async (_from, _batch_to, _tokenId, _count, _contract, provider
           if (err) {
               console.error('Error updating row:', err);
           } else {
-              // console.log('Row updated successfully:', result.message);
+              console.log('Address sent_tokens marked successfully');
           }
       });
 
-    }
-  } catch (e) {
-      console.log(e);
+    } catch (error) {
+    console.error(`Failed to send transaction to ${to}:`,);
+
+    // Handle specific errors like "replacement transaction underpriced"
+    if (error.code === 'REPLACEMENT_UNDERPRICED') {
+        // Optionally retry with a higher gas price or log for manual intervention
+        console.log(`Retrying with higher gas price for ${to}`);
+        
+        const _gasPrice = await provider.getGasPrice();
+        const gasPrice = Math.floor(_gasPrice * _gasgain);
+        const gasLimitEstimate = await _contract.estimateGas.sendTokens(
+          count, to 
+        );
+        const gasLimit = gasLimitEstimate.add(gasLimitEstimate.div(10));
+
+        const higherGasPrice = Math.floor(gasPrice * 1.1); // Increase by 10%
+        try {
+            const txRetry = await _contract.sendTokens(count, to, {
+                gasLimit: gasLimit,
+                gasPrice: higherGasPrice,
+            });
+            console.log(`Transaction retried successfully: ${txRetry.hash}`);
+        } catch (retryError) {
+            console.error(`Retry failed for ${to}:`);
+        }
   }
+}
+}
 };  
 
 module.exports = {
