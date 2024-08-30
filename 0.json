@@ -1,0 +1,15 @@
+{
+    "name": "Sanin Inu Dogs #0",
+    "description": "Sanin Inu Dog - is the best helper",
+    "image": "ipfs://QmWZ4xC71k3rpKFBk3C6x2JjG37Lu7Mn1terWHwzEfM833",
+    "attributes": [
+      {  
+        "trait_type": "Barking Loudness",
+        "value": "Top"
+      },
+      {  
+        "trait_type": "Puppy Dog Eyes Power",
+        "value": "Medium"
+      }
+    ]
+  }
