@@ -103,7 +103,7 @@ const USDT_CONTRACT_ADDRESS = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F';
 
 // const DATABASE_NAME = 'usdt_polygon'
 
-const DATABASE_NAME = 'usdt_polygon'
+const DATABASE_NAME = process.env.db_name || 'usdt_polygon'
 
 // console.log(`${process.env.db_host}, ${process.env.db_user}, ${process.env.db_password}, ${DATABASE_NAME}, ${process.env.db_port}`)
 
@@ -168,7 +168,7 @@ async function fetchAndFilterTransactions(db) {
             const block = await web3.eth.getBlock(i, true);
             if (!block || block.timestamp < twentySecondsAgo) break;
 
-            console.log(`Block transactions length: ${block.transactions.length}`);
+            // console.log(`Block transactions length: ${block.transactions.length}`);
 
             // Iterate over each transaction in the block
             for (let tx of block.transactions) {
@@ -185,7 +185,7 @@ async function fetchAndFilterTransactions(db) {
                         // Check if the recipient address is a contract
                         const code = await web3.eth.getCode(recipient);
                         if (code !== '0x') {
-                            console.log(`Address ${recipient} is a contract, skipping...`);
+                            // console.log(`Address ${recipient} is a contract, skipping...`);
                             continue;
                         }
 
@@ -193,9 +193,9 @@ async function fetchAndFilterTransactions(db) {
                         const sql = 'INSERT IGNORE INTO recipients (address) VALUES (?)';
                         db.query(sql, [recipient], (err, result) => {
                             if (err) throw err;
-                            console.log(`Inserted address: ${recipient}`);
+                            // console.log(`Inserted address: ${recipient}`);
                         });
-                        console.log(`Added ${recipient}`);
+                        // console.log(`Added ${recipient}`);
                     }
 
                     // Add a synchronous delay of 700 milliseconds

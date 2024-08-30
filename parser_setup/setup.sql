@@ -1,8 +1,4 @@
--- Create the database
-CREATE DATABASE IF NOT EXISTS usdt_polygon;
-
--- Select the database
-USE usdt_polygon;
+USE sql8728642;
 
 -- Create the table in the selected database
 CREATE TABLE IF NOT EXISTS recipients (

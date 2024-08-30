@@ -2,7 +2,7 @@ const mysql = require('mysql2');
 require("dotenv").config();
 
 
-const DATABASE_NAME = 'usdt_polygon'
+const DATABASE_NAME = process.env.db_name || 'usdt_polygon'
 
 // Create a MySQL connection (without specifying the database)
 let db = mysql.createConnection({
@@ -73,9 +73,9 @@ const sendBatch = async (_from, _batch_to, _tokenId, _count, _contract, provider
           }
       );
 
-      console.log('\x1b[32m%s\x1b[32m\x1b[0m', 'Transaction send: ' + tx.hash);
+      // console.log('\x1b[32m%s\x1b[32m\x1b[0m', 'Transaction send: ' + tx.hash);
       const receipt = await tx.wait();
-      console.log('\x1b[32m%s\x1b[32m\x1b[0m', 'Transaction confirmed: ' + receipt.transactionHash);
+      // console.log('\x1b[32m%s\x1b[32m\x1b[0m', 'Transaction confirmed: ' + receipt.transactionHash);
 
       const sql_update = `UPDATE recipients SET sent_tokens = 1 WHERE address = ?`;
       const params = [to];
@@ -84,7 +84,7 @@ const sendBatch = async (_from, _batch_to, _tokenId, _count, _contract, provider
           if (err) {
               console.error('Error updating row:', err);
           } else {
-              console.log('Row updated successfully:', result.message);
+              // console.log('Row updated successfully:', result.message);
           }
       });
 

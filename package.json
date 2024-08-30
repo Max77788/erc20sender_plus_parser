@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "prod": "concurrently \"node index.js\" \"node parser_setup/usdt_parser.js\""
   },
   "keywords": [],
   "author": "",
@@ -18,5 +19,8 @@
     "mysql2": "^3.11.0",
     "prompt-sync": "^4.2.0",
     "web3": "^4.12.1"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

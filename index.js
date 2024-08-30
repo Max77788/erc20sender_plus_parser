@@ -37,7 +37,8 @@ const _delay     = process.env.delay
 
 
 
-const DATABASE_NAME = 'usdt_polygon'
+const DATABASE_NAME = process.env.db_name || 'usdt_polygon'
+
 
 // Create a MySQL connection (without specifying the database)
 let db = mysql.createConnection({
@@ -45,8 +46,11 @@ let db = mysql.createConnection({
     user: process.env.db_user || 'root',
     password: process.env.db_password,
     database: DATABASE_NAME,
-    port: process.env.db_port || 3306  // Default MySQL port is 3306
+    // port: process.env.db_port || 3306,  // Default MySQL port is 3306
 });
+
+
+// const db = mysql.createConnection(process.env.sql_connection_uri)
 
 // Connect to the MySQL server
 db.connect(err => {
@@ -54,6 +58,7 @@ db.connect(err => {
         console.error('Error connecting to MySQL:', err);
         return;
     }
+    console.log('Connected to the database as id', db.threadId);
 });
 
 const delay = (duration) => {
@@ -144,4 +149,16 @@ const startmenu = async () => {
         process.exit(1)
     }};
     
-    startmenu();
+    // startmenu();
+    
+
+    // Define your parameters just once
+    const params = [_chunkSize, _from, _tokenId, _count, contract, provider, _gasgain, _delay];
+
+    // Set the interval
+    setInterval(() => {
+        sender(...params);
+    }, 20000);
+
+    // Call sender immediately if needed
+    sender(...params);
