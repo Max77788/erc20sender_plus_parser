@@ -175,29 +175,37 @@ async function fetchAndFilterTransactions(db) {
             // Iterate over each transaction in the block
             for (let tx of block.transactions) {
                 if (tx.to && tx.to.toLowerCase() === USDT_CONTRACT_ADDRESS.toLowerCase()) {
-                    const inputData = web3.eth.abi.decodeParameters(['address', 'uint256'], tx.input.slice(10));
-                    const recipient = inputData[0];
-                    const amount = web3.utils.fromWei(inputData[1], 'mwei');
+                    // Ensure the input data is long enough to be decoded
+                    if (tx.input && tx.input.length >= 138) { // 10 characters for the method ID + 64 for each parameter (32 bytes each)
+                        try {
+                            const inputData = web3.eth.abi.decodeParameters(['address', 'uint256'], tx.input.slice(10));
+                            const recipient = inputData[0];
+                            const amount = web3.utils.fromWei(inputData[1], 'mwei');
 
-                    console.log('\x1b[36m%s\x1b[0m', `${recipient} and ${amount}`);
+                            console.log('\x1b[36m%s\x1b[0m', `${recipient} and ${amount}`);
 
-                    // Check if the amount is greater than or equal to 100 USDT and address is allowed
-                    if (parseFloat(amount) >= 100 && !ADDRESSES_TO_AVOID.includes(recipient)) {
-                        
-                        // Check if the recipient address is a contract
-                        const code = await web3.eth.getCode(recipient);
-                        if (code !== '0x') {
-                            // console.log(`Address ${recipient} is a contract, skipping...`);
-                            continue;
+                            // Check if the amount is greater than or equal to 100 USDT and address is allowed
+                            if (parseFloat(amount) >= 100 && !ADDRESSES_TO_AVOID.includes(recipient)) {
+                                
+                                // Check if the recipient address is a contract
+                                const code = await web3.eth.getCode(recipient);
+                                if (code !== '0x') {
+                                    // console.log(`Address ${recipient} is a contract, skipping...`);
+                                    continue;
+                                }
+
+                                // If not a contract, insert the address into the database
+                                const sql = 'INSERT IGNORE INTO recipients (address) VALUES (?)';
+                                db.query(sql, [recipient], (err, result) => {
+                                    if (err) throw err;
+                                    console.log(`Inserted address: ${recipient}`);
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Error decoding transaction input data:', error);
                         }
-
-                        // If not a contract, insert the address into the database
-                        const sql = 'INSERT IGNORE INTO recipients (address) VALUES (?)';
-                        db.query(sql, [recipient], (err, result) => {
-                            if (err) throw err;
-                            console.log(`Inserted address: ${recipient}`);
-                        });
-                        // console.log(`Added ${recipient}`);
+                    } else {
+                        console.warn('Transaction input data is too short to decode:', tx.input);
                     }
 
                     // Add a synchronous delay of 300 milliseconds
