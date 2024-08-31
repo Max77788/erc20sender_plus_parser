@@ -46,7 +46,7 @@ let db = mysql.createConnection({
     user: process.env.db_user || 'root',
     password: process.env.db_password,
     database: DATABASE_NAME,
-    // port: process.env.db_port || 3306,  // Default MySQL port is 3306
+    port: process.env.db_port || 3306,  // Default MySQL port is 3306
 });
 
 
