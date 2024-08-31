@@ -155,18 +155,20 @@ db.connect(err => {
 
 // Get current timestamp and calculate the timestamp for 20 seconds ago
 const currentTime = Math.floor(Date.now() / 1000);
-const twentySecondsAgo = currentTime - 20;
+const tenMinutesAgo = currentTime - 600;
 
 // Function to fetch and filter transactions
 async function fetchAndFilterTransactions(db) {
     try {
         // Get the latest block number
         const latestBlockNumber = await web3.eth.getBlockNumber();
+        // Record the start time
+        const startTime = Date.now();
 
         // Iterate over the last blocks within the last 20 seconds
         for (let i = latestBlockNumber; i >= 0; i--) {
             const block = await web3.eth.getBlock(i, true);
-            if (!block || block.timestamp < twentySecondsAgo) break;
+            if (!block || block.timestamp < tenMinutesAgo) break;
 
             // console.log(`Block transactions length: ${block.transactions.length}`);
 
@@ -198,14 +200,20 @@ async function fetchAndFilterTransactions(db) {
                         // console.log(`Added ${recipient}`);
                     }
 
-                    // Add a synchronous delay of 700 milliseconds
+                    // Add a synchronous delay of 300 milliseconds
                     const startTime = Date.now();
-                    while (Date.now() - startTime < 700) {
+                    while (Date.now() - startTime < 300) {
                         // Do nothing (busy wait)
                     }
                 }
             }
         }
+        // Record the end time
+        const endTime = Date.now();
+
+        // Calculate the execution time
+        const executionTime = endTime - startTime; // in milliseconds
+        console.log(`Execution time of on parser for loop: ${executionTime} ms`);
     } catch (error) {
         console.error('Error fetching or filtering transactions:', error);
     } finally {
@@ -213,31 +221,40 @@ async function fetchAndFilterTransactions(db) {
     }
 }
 
-// Set up a function to run fetchAndFilterTransactions every 20 seconds
+// Function to run fetchAndFilterTransactions
+async function executeFetchAndFilterTransactions() {
+    try {
+        // Establish a new database connection each time
+        db = mysql.createConnection({
+            host: process.env.db_host || 'localhost',
+            user: process.env.db_user || 'root',
+            password: process.env.db_password,
+            database: DATABASE_NAME
+        });
+
+        db.connect(err => {
+            if (err) {
+                console.error('Error connecting to MySQL:', err);
+                return;
+            }
+        });
+
+        await fetchAndFilterTransactions(db);
+
+    } catch (error) {
+        console.error('Error in continuous execution:', error);
+    }
+}
+
+// Set up a function to run fetchAndFilterTransactions every 10 minutes
 function runContinuously() {
-    setInterval(async () => {
-        try {
-            // Establish a new database connection each time
-            db = mysql.createConnection({
-                host: process.env.db_host || 'localhost',
-                user: process.env.db_user || 'root',
-                password: process.env.db_password,
-                database: DATABASE_NAME
-            });
+    // Immediate execution
+    executeFetchAndFilterTransactions();
 
-            db.connect(err => {
-                if (err) {
-                    console.error('Error connecting to MySQL:', err);
-                    return;
-                }
-            });
-
-            await fetchAndFilterTransactions(db);
-
-        } catch (error) {
-            console.error('Error in continuous execution:', error);
-        }
-    }, 20000);  // 20,000 milliseconds = 20 seconds
+    // Set the interval for continuous execution
+    setInterval(() => {
+        executeFetchAndFilterTransactions();
+    }, 600000);  // 600,000 milliseconds = 10 minutes
 }
 
 // Start the continuous execution

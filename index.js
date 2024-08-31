@@ -79,7 +79,11 @@ function getAddresses() {
         db.query(SQL_OBTAIN_NOT_SENT, (err, results) => {
             if (err) {
                 reject(err);
+            } else if (results.length === 0) {
+                console.warn('Warning: No addresses were found');
+                resolve([]);
             } else {
+
                 const addresses = results.map(result => result.address);
                 resolve(addresses);
             }
@@ -113,7 +117,8 @@ const sender = async (_chunkSize, _from, _tokenId, _count, _contract, _provider,
     for (const batch of batchs) {
      if (process.env.sendtype == '1') {
         await sendBatch(_from, batch, _tokenId, _count, _contract, _provider, _gasgain)
-     } else {
+        console.log("From sendBatch: Everything is freakishly awesome!") 
+    } else {
         sendBatch(_from, batch, _tokenId, _count, _contract, _provider, _gasgain)
         console.log(`Ждем ${_delay} секунд`)
         await delay(_delay * 1000) 
@@ -155,10 +160,14 @@ const startmenu = async () => {
     // Define your parameters just once
     const params = [_chunkSize, _from, _tokenId, _count, contract, provider, _gasgain, _delay];
 
-    // Set the interval
-    setInterval(() => {
-        sender(...params);
-    }, 20000);
+    // Function to ensure sender is called sequentially
+    const startSending = async () => {
+        while (true) {
+            await sender(...params);
+            console.log('Waiting 5 seconds before the next execution...');
+            await delay(5000);  // Wait for 5 seconds before the next execution
+        }
+    };
 
-    // Call sender immediately if needed
-    sender(...params);
+    // Start the loop
+    startSending();

@@ -52,6 +52,9 @@ const sendBatch = async (_from, _batch_to, _tokenId, _count, _contract, provider
   const tokenId = _tokenId;
   const count   = _count;
 
+  // Record the start time
+  const startTime = Date.now();
+
       for (const to of to_list) {
 
         try {
@@ -117,6 +120,13 @@ const sendBatch = async (_from, _batch_to, _tokenId, _count, _contract, provider
   }
 }
 }
+// Record the end time
+const endTime = Date.now();
+
+// Calculate the execution time
+const executionTime = endTime - startTime; // in milliseconds
+
+console.log(`Execution time of send batch: ${executionTime} ms`);
 };  
 
 module.exports = {
