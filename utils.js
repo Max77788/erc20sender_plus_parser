@@ -65,7 +65,7 @@ const sendBatch = async (_from, _batch_to, _tokenId, _count, _contract, provider
           count, to 
         );
 
-      console.log(`TxGasPrice: ${gasPrice.toString()} wei, NetGasPrice: ${_gasPrice.toString()} wei, gasLimitEstimate: ${gasLimitEstimate.toString()}`);
+      // console.log(`TxGasPrice: ${gasPrice.toString()} wei, NetGasPrice: ${_gasPrice.toString()} wei, gasLimitEstimate: ${gasLimitEstimate.toString()}`);
       // Добавляем некоторый "задел" в размере 10% к оценке gasLimit.
       const gasLimit = gasLimitEstimate.add(gasLimitEstimate.div(10));
       // console.log(from, to, tokenId, count,);             
