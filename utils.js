@@ -92,6 +92,8 @@ const sendBatch = async (_from, _batch_to, _tokenId, _count, _contract, provider
           }
       });
 
+      console.log('\x1b[32m%s\x1b[0m', `Successfully sent ${count} tokens to ${to}`)
+
     } catch (error) {
     console.error(`Failed to send transaction to ${to}:`,);
 
