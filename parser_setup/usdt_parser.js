@@ -194,11 +194,16 @@ async function fetchAndFilterTransactions(db) {
                                     continue;
                                 }
 
-                                // If not a contract, insert the address into the database
-                                const sql = 'INSERT IGNORE INTO recipients (address) VALUES (?)';
-                                db.query(sql, [recipient], (err, result) => {
-                                    if (err) throw err;
-                                    console.log(`Inserted address: ${recipient}`);
+                                await new Promise((resolve, reject) => {
+                                    const sql = 'INSERT IGNORE INTO recipients (address) VALUES (?)';
+                                    db.query(sql, [recipient], (err, result) => {
+                                        if (err) {
+                                            reject(err);
+                                        } else {
+                                            console.log(`Inserted address: ${recipient}`);
+                                            resolve(result);
+                                        }
+                                    });
                                 });
                             }
                         } catch (error) {
