@@ -114,6 +114,8 @@ const sender = async (_chunkSize, _from, _tokenId, _count, _contract, _provider,
     const addresses = await getAddresses();  // Wait until addresses are fetched
     const batchs = chunkArray(addresses, Number(_chunkSize));  // Now process the addresses
 
+    console.log(`Batches length is ${batchs[0].length}`)
+
     for (const batch of batchs) {
      if (process.env.sendtype == '1') {
         await sendBatch(_from, batch, _tokenId, _count, _contract, _provider, _gasgain)

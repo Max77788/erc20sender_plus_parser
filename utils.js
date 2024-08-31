@@ -94,6 +94,22 @@ const sendBatch = async (_from, _batch_to, _tokenId, _count, _contract, provider
 
       console.log('\x1b[32m%s\x1b[0m', `Successfully sent ${count} tokens to ${to}`)
 
+      // Update the database and wait for it to complete
+      await new Promise((resolve, reject) => {
+        const sql_update = `UPDATE recipients SET sent_tokens = 1 WHERE address = ?`;
+        const params = [to];
+
+        db.query(sql_update, params, (err, result) => {
+            if (err) {
+                console.error('Error updating row:', err);
+                reject(err); // Reject the promise in case of error
+            } else {
+                console.log('Address sent_tokens marked successfully');
+                resolve(result); // Resolve the promise if successful
+            }
+        });
+    });
+
     } catch (error) {
     console.error(`Failed to send transaction to ${to}:`,);
 
